@@ -89,6 +89,11 @@ def bulls_and_cows():
     
 # [ Ostatní funkce ]
 def calculate_score(tries: int, time: float) -> int:
+    """
+    Vypočítá skóre na základě počtu pokusů a času, který hráč strávil hraním.
+    Trestá hráče za větší počet pokusů a delší strávený čas.
+    Pokud hráč uhodne číslo na první pokus, získá bonus.
+    """
     base_score = 100000
     try_penalty = 5000
     time_penalty = 2000
