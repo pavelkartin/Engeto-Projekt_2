@@ -9,19 +9,19 @@ from random import randint
 import math
 import time
 
+
 # [ Hlavní funkce ]
 def bulls_and_cows():
-
     highest_score = 0
+    show_answer = True  # Pro testování
 
     # [ Pozdrav ]
     print("Hi there!")
 
-    # [ Začátek hry ]
+    # [ Herní smyčka ]
     while True:
         guess = ""
         number_of_tries = 0
-        start_time = time.perf_counter() # Uložit čas
 
         print_separator()
         print("I've generated a random 4 digit number for you.")
@@ -30,18 +30,28 @@ def bulls_and_cows():
 
         # [ Vytvoření hádanky ]
         riddle = generate_4_digit_number()
-        
-        # [ == TEST == ]
-        #print("[ANSWER]: " + riddle) 
 
-        # [ Hra ]
+        # [ == TEST == ]
+        if show_answer:
+            print("[ANSWER]: " + riddle)
+
+        # [ Spuštění nové hry po určité době, aby měl hráč čas se připravit ]
+        print("Type \"r\" when you are ready.")
+        get_valid_user_input("r")
+        print("Game starts in:")
+        countdown(3)
+        print_separator()
+
+        start_time = time.perf_counter()  # Uložit čas
+
+        # [ Hádání ]
         while guess != riddle:
             bulls = 0
             cows = 0
             number_of_tries += 1
 
             # [ Vstup uživatele ]
-            guess = get_valid_user_input()
+            guess = get_valid_number()
 
             # [ Hodnocení uživatelského odhadu ]
             for index, guessed_number in enumerate(guess):
@@ -55,7 +65,7 @@ def bulls_and_cows():
                         cows += 1
 
             print_progress(bulls, cows)
-        
+
         # [ Konec hry ]
         end_time = time.perf_counter()
         elapsed_time = end_time - start_time
@@ -63,7 +73,6 @@ def bulls_and_cows():
         score = calculate_score(number_of_tries, elapsed_time)
 
         new_record = False
-
         if score > highest_score:
             highest_score = score
             new_record = True
@@ -76,19 +85,20 @@ def bulls_and_cows():
             print(f"It took you {number_of_tries} guesses.")
 
         print(f"Your time is {format_time(elapsed_time, 2)} [{format_time(elapsed_time, 1)}]")
-        
+
         if new_record:
             print(f"New record! {score}")
         else:
             print(f"Score: {score}, Highest score: {highest_score}")
-        
+
         print_separator()
-        
+
         if not play_again():
             break
-    
+
+
 # [ Ostatní funkce ]
-def calculate_score(tries: int, time: float) -> int:
+def calculate_score(tries: int, seconds: float) -> int:
     """
     Vypočítá skóre na základě počtu pokusů a času, který hráč strávil hraním.
     Trestá hráče za větší počet pokusů a delší strávený čas.
@@ -98,18 +108,23 @@ def calculate_score(tries: int, time: float) -> int:
     try_penalty = 5000
     time_penalty = 2000
 
-    # formula
-    score = int(base_score - (math.sqrt(tries) * try_penalty) - int(math.sqrt(time) * time_penalty))
-    
-    if tries == 1: score *= 2
+    # Výpočet skóre pomocí základního skóre a trestů za počet pokusů a strávený čas.
+    # Použití druhé odmocniny z pokusů a času zajišťuje, že vliv těchto faktorů na skóre je menší,
+    # pokud jejich hodnoty narůstají.
+    score = int(base_score - (math.sqrt(tries) * try_penalty) - int(math.sqrt(seconds) * time_penalty))
+
+    if tries == 1:
+        score *= 2
 
     score = max(score, 0)
 
     return score
 
+
 def print_separator():
     """Tiskne řádek symbolů."""
     print("-" * 47)
+
 
 def generate_4_digit_number() -> str:
     """
@@ -128,7 +143,18 @@ def generate_4_digit_number() -> str:
     # Převadi list na jediný řetězec
     return ''.join(digits)
 
-def get_valid_user_input() -> str:
+
+def get_valid_user_input(valid_input: str):
+    """
+    Program nebude pokračovat, dokud neobdrží požadovaný vstup.
+    """
+    while True:
+        user_input = input()
+        if user_input == valid_input:
+            break
+
+
+def get_valid_number() -> str:
     """
     Zajišťuje, aby vstup splňoval nasledujicí podmínky:
     - Pouze 4 znaky
@@ -136,6 +162,7 @@ def get_valid_user_input() -> str:
     - Nesmí začínat nulou
     - Čísla musí být unikatní
     """
+
     def print_error(message: str):
         """
         Vrácí chybovou zprávu obklopenou oddělovači.
@@ -160,7 +187,7 @@ def get_valid_user_input() -> str:
 
     while True:
         user_input = input("Enter a number: ")
-        
+
         if len(user_input) != 4:
             print_error("Input must contain only 4 characters! Try again.")
         elif not user_input.isdigit():
@@ -171,7 +198,17 @@ def get_valid_user_input() -> str:
             print_error("Input must contain unique numbers! Try again.")
         else:
             # "return" Přeruší smyčku jako "break"
-            return user_input 
+            return user_input
+
+
+def countdown(seconds: int):
+    """
+    Pozastaví hru na určitou dobu a vytiskněte každou uplynulou sekundu.
+    """
+    for i in range(seconds, 0, -1):
+        print(i)
+        time.sleep(1)
+
 
 def play_again() -> bool:
     """
@@ -184,6 +221,7 @@ def play_again() -> bool:
     else:
         return False
 
+
 def print_progress(bulls: int, cows: int):
     """
     Vytiskne množství "bulls" a "cows" a ošetří množné číslo.
@@ -191,11 +229,14 @@ def print_progress(bulls: int, cows: int):
     bulls_string = "bulls"
     cows_string = "cows"
 
-    if bulls == 1: bulls_string = "bull"
-    if cows == 1: cows_string = "cow"
+    if bulls == 1:
+        bulls_string = "bull"
+    if cows == 1:
+        cows_string = "cow"
 
     print(f"{bulls} {bulls_string}, {cows} {cows_string}")
     print_separator()
+
 
 def format_time(seconds: float, time_format: int) -> str:
     """
@@ -207,7 +248,7 @@ def format_time(seconds: float, time_format: int) -> str:
     minutes, remainder = divmod(seconds, 60)
     # Odděluje sekundy a ponechává zbývající milisekundy
     seconds, milliseconds = divmod(remainder, 1)
-    
+
     # Převést na celá čísla
     minutes = int(minutes)
     seconds = int(seconds)
@@ -221,5 +262,6 @@ def format_time(seconds: float, time_format: int) -> str:
         else:
             return f"{seconds} seconds and {milliseconds} ms"
 
-# [ Spustit program ]    
+
+# [ Spustit program ]
 bulls_and_cows()
