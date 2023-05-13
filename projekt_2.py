@@ -13,7 +13,7 @@ import time
 # [ Hlavní funkce ]
 def bulls_and_cows():
     highest_score = 0
-    show_answer = True  # Pro testování
+    show_answer = False  # Pro testování
 
     # [ Pozdrav ]
     print("Hi there!")
@@ -264,4 +264,5 @@ def format_time(seconds: float, time_format: int) -> str:
 
 
 # [ Spustit program ]
-bulls_and_cows()
+if __name__ == "__main__":
+    bulls_and_cows()
